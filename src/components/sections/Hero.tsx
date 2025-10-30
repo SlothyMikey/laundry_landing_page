@@ -24,7 +24,7 @@ export default function Hero() {
             {/* CTA Buttons */}
             <div className="flex flex-col gap-4 justify-center sm:justify-start md:flex-row">
               <Button variant="contained" color="primary">
-                Track My Laundry
+                Book Laudnry Now
               </Button>
 
               <Button variant="text" color="primary" href="#services">

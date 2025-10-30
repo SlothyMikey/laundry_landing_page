@@ -119,7 +119,7 @@ export default function Footer() {
         <div className="pt-8 border-t border-txt-muted/10">
           <div className="flex flex-col md:flex-row justify-center items-center gap-4">
             <p className="text-txt-muted text-sm">
-              © {currentYear} FreshWash. All rights reserved.
+              © {currentYear} Laversavon. All rights reserved.
             </p>
           </div>
         </div>
