@@ -1,6 +1,4 @@
 import '@/global.css';
-import LaundryMachine from '@/assets/images/LaundryMachine.png';
-import DeliveryRider from '@/assets/images/DeliveryRider.png';
 import LaundryBookingForm from '@/components/forms/LaundryBookingForm';
 
 export default function Booking() {
