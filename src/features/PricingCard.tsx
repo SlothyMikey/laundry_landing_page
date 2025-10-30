@@ -1,6 +1,7 @@
 import Button from '@mui/material/Button';
 import CheckIcon from '@mui/icons-material/Check';
 import type { PricingPlanTypes } from '@/types/pricingTypes';
+import { Link } from 'react-router-dom';
 
 export default function PricingCard({
   price,
@@ -50,25 +51,27 @@ export default function PricingCard({
       </ul>
 
       {showButton && (
-        <Button
-          variant="contained"
-          fullWidth
-          sx={{
-            backgroundColor: isExclusive ? 'white' : 'var(--color-primary)',
-            color: isExclusive ? 'var(--color-primary)' : 'white',
-            '&:hover': {
-              backgroundColor: isExclusive
-                ? 'var(--color-accent)'
-                : 'var(--color-primary)',
-            },
-            textTransform: 'none',
-            fontWeight: 600,
-            py: 1.5,
-            borderRadius: 2,
-          }}
-        >
-          Contact Us
-        </Button>
+        <Link to="/booking">
+          <Button
+            variant="contained"
+            fullWidth
+            sx={{
+              backgroundColor: isExclusive ? 'white' : 'var(--color-primary)',
+              color: isExclusive ? 'var(--color-primary)' : 'white',
+              '&:hover': {
+                backgroundColor: isExclusive
+                  ? 'var(--color-accent)'
+                  : 'var(--color-primary)',
+              },
+              textTransform: 'none',
+              fontWeight: 600,
+              py: 1.5,
+              borderRadius: 2,
+            }}
+          >
+            Book Now!
+          </Button>
+        </Link>
       )}
     </div>
   );
