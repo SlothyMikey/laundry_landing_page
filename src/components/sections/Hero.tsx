@@ -1,5 +1,6 @@
 import '@/global.css';
 import Button from '@mui/material/Button';
+import { Link } from 'react-router-dom';
 
 export default function Hero() {
   return (
@@ -23,9 +24,11 @@ export default function Hero() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col gap-4 justify-center sm:justify-start md:flex-row">
-              <Button variant="contained" color="primary">
-                Book Laudnry Now
-              </Button>
+              <Link to="/booking">
+                <Button variant="contained" color="primary">
+                  Book Laundry Now
+                </Button>
+              </Link>
 
               <Button variant="text" color="primary" href="#services">
                 Learn More
