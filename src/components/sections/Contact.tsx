@@ -4,6 +4,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import Map from '@/features/Map';
 
+// Business location coordinates
 const businessLocation = { lat: 14.2226546, lng: 120.9736 };
 
 export default function Contact() {
