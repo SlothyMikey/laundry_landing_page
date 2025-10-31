@@ -2,25 +2,10 @@ import Logo from '@/components/ui/Logo';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PhoneIcon from '@mui/icons-material/Phone';
 import FacebookIcon from '@mui/icons-material/Facebook';
+import { quickLinks, services } from '@/constants/FooterData';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
-
-  const quickLinks = [
-    { name: 'Home', href: '#home' },
-    { name: 'Services', href: '#services' },
-    { name: 'Pricing', href: '#pricing' },
-    { name: 'FAQ', href: '#faq' },
-    { name: 'Contact', href: '#contact' },
-  ];
-
-  const services = [
-    'Wash & Fold',
-    'Dry Cleaning',
-    'Ironing Service',
-    'Self-Service',
-    'Pickup & Delivery',
-  ];
 
   return (
     <footer className="w-full bg-dark-light border-t border-txt-muted/10 transition-colors duration-300 text-white">
