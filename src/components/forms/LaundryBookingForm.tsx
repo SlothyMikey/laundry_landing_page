@@ -9,25 +9,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Link } from 'react-router-dom';
-
-interface FormData {
-  // Personal Info
-  fullName: string;
-  phoneNumber: string;
-  email?: string;
-  pickupAddress: string;
-
-  // Service Details
-  service: string;
-  additionalServices?: string[];
-
-  // Schedule
-  pickupDate: string;
-  pickupTime: string;
-
-  // Review
-  specialInstructions: string;
-}
+import type { FormData } from '@/types/BookingTypes';
 
 export default function LaundryBookingForm() {
   const [currentStep, setCurrentStep] = useState(1);
