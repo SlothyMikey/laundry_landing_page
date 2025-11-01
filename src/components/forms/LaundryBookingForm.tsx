@@ -1,18 +1,25 @@
+//TODO: Implement Customer Identity Verification Logic
+
 import { useState } from 'react';
 import { pricingPlans, additionalServices } from '@/constants/pricingData';
 import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
+import Button from '@mui/material/Button';
 import PersonIcon from '@mui/icons-material/Person';
 import LocalLaundryServiceIcon from '@mui/icons-material/LocalLaundryService';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CheckIcon from '@mui/icons-material/Check';
 import { Link } from 'react-router-dom';
 import type { FormData } from '@/types/BookingTypes';
+import { isPhoneNumberValid } from '@/lib/utils';
 
 export default function LaundryBookingForm() {
   const [currentStep, setCurrentStep] = useState(1);
+  const [isCustomerVerified, setIsCustomerVerified] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     fullName: '',
     phoneNumber: '',
@@ -24,6 +31,7 @@ export default function LaundryBookingForm() {
     pickupTime: '',
     specialInstructions: '',
   });
+  const [isReturningCustomer, setIsReturningCustomer] = useState(false);
 
   const allServices = [
     ...pricingPlans.map((plan) => ({
@@ -59,13 +67,20 @@ export default function LaundryBookingForm() {
 
   const handleNext = () => {
     if (currentStep === 1) {
-      if (
-        !formData.fullName.trim() ||
-        !formData.phoneNumber.trim() ||
-        !formData.pickupAddress.trim()
-      ) {
-        alert('Please fill in all required fields');
-        return;
+      if (isReturningCustomer) {
+        if (!isCustomerVerified) {
+          alert('Please verify your phone number');
+          return;
+        }
+      } else {
+        if (
+          !formData.fullName.trim() ||
+          !formData.phoneNumber.trim() ||
+          !formData.pickupAddress.trim()
+        ) {
+          alert('Please fill in all required fields');
+          return;
+        }
       }
     }
 
@@ -109,13 +124,22 @@ export default function LaundryBookingForm() {
     <div className="w-full bg-white rounded-2xl shadow-xl p-6 md:p-10 lg:p-12">
       {/* Back to Home */}
       <div className="mb-4">
-        <Link
+        <Button
+          component={Link}
           to="/"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+          variant="outlined"
+          startIcon={<ArrowBackIcon />}
+          sx={{
+            color: '#374151',
+            borderColor: '#e5e7eb',
+            '&:hover': {
+              borderColor: '#9ca3af',
+              backgroundColor: '#f3f4f6',
+            },
+          }}
         >
-          <ArrowBackIcon fontSize="small" />
-          <span>Back to Home</span>
-        </Link>
+          Back to Home
+        </Button>
       </div>
 
       {/* Header */}
@@ -204,23 +228,92 @@ export default function LaundryBookingForm() {
               Please provide your contact details for pickup/delivery
             </p>
 
-            {/* Name and Phone - Side by Side */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-txt-primary mb-2">
-                  Full Name <span className="text-orange-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  placeholder="John Doe"
-                  required
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-bg-highlight bg-gray-50"
-                />
-              </div>
+            {/* Returning Customer Checkbox */}
+            <div className="flex items-center mb-4">
+              <input
+                type="checkbox"
+                id="returningCustomer"
+                checked={isReturningCustomer}
+                onChange={() => setIsReturningCustomer(!isReturningCustomer)}
+                className="mr-2"
+              />
+              <label
+                htmlFor="returningCustomer"
+                className="text-sm text-txt-primary"
+              >
+                Are You A Returning Customer?
+              </label>
+            </div>
 
+            {/* Conditional rendering for form fields */}
+            {!isReturningCustomer ? (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-txt-primary mb-2">
+                      Full Name <span className="text-orange-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="fullName"
+                      value={formData.fullName}
+                      onChange={handleChange}
+                      placeholder="John Doe"
+                      required
+                      className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-bg-highlight bg-gray-50"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-txt-primary mb-2">
+                      Phone Number <span className="text-orange-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      name="phoneNumber"
+                      value={formData.phoneNumber}
+                      onChange={handleChange}
+                      placeholder="0912 345 6789"
+                      required
+                      className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-bg-highlight bg-gray-50"
+                    />
+                  </div>
+                </div>
+
+                {/* Email - Full Width */}
+                <div>
+                  <label className="block text-sm font-medium text-txt-primary mb-2">
+                    Email Address (Optional)
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="JohnDoe@example.com"
+                    required
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-bg-highlight bg-gray-50"
+                  />
+                </div>
+
+                {/* Pickup/Delivery Address - Full Width */}
+                <div>
+                  <label className="block text-sm font-medium text-txt-primary mb-2">
+                    Pickup/Delivery Address{' '}
+                    <span className="text-orange-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="pickupAddress"
+                    value={formData.pickupAddress}
+                    onChange={handleChange}
+                    placeholder="123 Main St, City"
+                    required
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-bg-highlight bg-gray-50"
+                  />
+                </div>
+              </>
+            ) : (
               <div>
                 <label className="block text-sm font-medium text-txt-primary mb-2">
                   Phone Number <span className="text-orange-500">*</span>
@@ -229,46 +322,35 @@ export default function LaundryBookingForm() {
                   type="tel"
                   name="phoneNumber"
                   value={formData.phoneNumber}
-                  onChange={handleChange}
-                  placeholder="+63 912 345 6789"
+                  onChange={(e) => {
+                    handleChange(e);
+                    isCustomerVerified && setIsCustomerVerified(false); // Reset verification if number changes
+                  }}
+                  placeholder="0912 345 6789"
                   required
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-bg-highlight bg-gray-50"
+                  className="max-w-full border border-gray-300 rounded-lg mr-4 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-bg-highlight bg-gray-50"
                 />
+                <Button
+                  type="button"
+                  disabled={
+                    !formData.phoneNumber ||
+                    formData.phoneNumber.trim() === '' ||
+                    !isPhoneNumberValid(formData.phoneNumber)
+                  }
+                  onClick={() => setIsCustomerVerified(!isCustomerVerified)}
+                  startIcon={<CheckIcon />}
+                  variant="contained"
+                  color="primary"
+                  sx={{
+                    marginTop: '8px',
+                  }}
+                >
+                  Verify
+                </Button>
               </div>
-            </div>
+            )}
 
-            {/* Email - Full Width */}
-            <div>
-              <label className="block text-sm font-medium text-txt-primary mb-2">
-                Email Address (Optional)
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="JohnDoe@example.com"
-                required
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-bg-highlight bg-gray-50"
-              />
-            </div>
-
-            {/* Pickup/Delivery Address - Full Width */}
-            <div>
-              <label className="block text-sm font-medium text-txt-primary mb-2">
-                Pickup/Delivery Address{' '}
-                <span className="text-orange-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="pickupAddress"
-                value={formData.pickupAddress}
-                onChange={handleChange}
-                placeholder="123 Main St, City"
-                required
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-bg-highlight bg-gray-50"
-              />
-            </div>
+            {/* Always show phone number field */}
           </div>
         )}
 
@@ -501,34 +583,59 @@ export default function LaundryBookingForm() {
 
         {/* Navigation Buttons */}
         <div className="flex justify-between mt-8 pt-6 border-t gap-4">
-          <button
+          <Button
             type="button"
             onClick={handleBack}
             disabled={currentStep === 1}
-            className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
-              currentStep === 1
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
+            variant="outlined"
+            startIcon={<ArrowBackIcon />}
+            sx={{
+              color: currentStep === 1 ? '#9ca3af' : '#374151',
+              borderColor: currentStep === 1 ? '#e5e7eb' : '#d1d5db',
+              '&:hover': {
+                borderColor: currentStep === 1 ? '#e5e7eb' : '#9ca3af',
+                backgroundColor: currentStep === 1 ? 'transparent' : '#f3f4f6',
+              },
+              '&.Mui-disabled': {
+                color: '#9ca3af',
+                borderColor: '#e5e7eb',
+              },
+            }}
           >
-            ← Back
-          </button>
+            Back
+          </Button>
 
           {currentStep < 4 ? (
-            <button
+            <Button
               type="button"
               onClick={handleNext}
-              className="px-6 py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 transition-colors"
+              variant="contained"
+              endIcon={<ArrowForwardIcon />}
+              sx={{
+                backgroundColor: '#000',
+                color: '#fff',
+                '&:hover': {
+                  backgroundColor: '#1f2937',
+                },
+              }}
             >
-              Next →
-            </button>
+              Next
+            </Button>
           ) : (
-            <button
+            <Button
               type="submit"
-              className="px-6 py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 transition-colors"
+              variant="contained"
+              endIcon={<CheckCircleIcon />}
+              sx={{
+                backgroundColor: '#000',
+                color: '#fff',
+                '&:hover': {
+                  backgroundColor: '#1f2937',
+                },
+              }}
             >
-              Confirm Booking ✓
-            </button>
+              Confirm Booking
+            </Button>
           )}
         </div>
       </form>
