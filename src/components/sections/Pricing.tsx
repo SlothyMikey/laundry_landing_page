@@ -1,5 +1,5 @@
 import PricingCard from '@/features/PricingCard';
-import { pricingPlans, additionalServices } from '@/constants/pricingData';
+import { promoPlans, services } from '@/constants/pricingData';
 import LaundryBasket from '@/assets/images/LaundryBasket.png';
 
 export default function Pricing() {
@@ -45,14 +45,14 @@ export default function Pricing() {
           <div className="flex flex-col lg:flex-row gap-8 items-start justify-center">
             {/* Left Section - Main Pricing Plans */}
             <div className="w-full flex flex-col justify-center md:flex-row gap-6 lg:sticky lg:top-24 lg:self-start">
-              {pricingPlans.map((plan, index) => (
+              {promoPlans.map((plan, index) => (
                 <PricingCard key={index} {...plan} />
               ))}
             </div>
 
             {/* Right Section - Additional Services */}
             <div className="flex flex-col items-center gap-6 w-full lg:w-auto">
-              {additionalServices.map((service, index) => (
+              {services.map((service, index) => (
                 <PricingCard key={index} {...service} />
               ))}
             </div>
