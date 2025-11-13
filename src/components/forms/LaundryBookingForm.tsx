@@ -201,7 +201,7 @@ export default function LaundryBookingForm() {
 
       {/* Header */}
       <div className="mb-6">
-        <h2 className="text-2xl md:text-3xl font-bold text-txt-primary mb-2">
+        <h2 className="text-2xl md:text-3xl font-bold text-dark mb-2">
           Book Your Laundry Service
         </h2>
         <p className="text-sm text-txt-muted">
@@ -276,8 +276,8 @@ export default function LaundryBookingForm() {
         {currentStep === 1 && (
           <div className="space-y-6">
             <div className="flex items-center gap-2 mb-4">
-              <PersonIcon className="text-txt-primary" />
-              <h3 className="text-xl font-semibold text-txt-primary">
+              <PersonIcon className="text-dark" />
+              <h3 className="text-xl font-semibold text-dark">
                 Personal Information
               </h3>
             </div>
@@ -294,10 +294,7 @@ export default function LaundryBookingForm() {
                 onChange={() => setIsReturningCustomer(!isReturningCustomer)}
                 className="mr-2"
               />
-              <label
-                htmlFor="returningCustomer"
-                className="text-sm text-txt-primary"
-              >
+              <label htmlFor="returningCustomer" className="text-sm text-dark">
                 Are You A Returning Customer?
               </label>
             </div>
@@ -307,7 +304,7 @@ export default function LaundryBookingForm() {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-txt-primary mb-2">
+                    <label className="block text-sm font-medium text-dark mb-2">
                       Full Name <span className="text-orange-500">*</span>
                     </label>
                     <input
@@ -321,7 +318,7 @@ export default function LaundryBookingForm() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-txt-primary mb-2">
+                    <label className="block text-sm font-medium text-dark mb-2">
                       Phone Number <span className="text-orange-500">*</span>
                     </label>
                     <input
@@ -336,7 +333,7 @@ export default function LaundryBookingForm() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-txt-primary mb-2">
+                  <label className="block text-sm font-medium text-dark mb-2">
                     Email Address (Optional)
                   </label>
                   <input
@@ -349,7 +346,7 @@ export default function LaundryBookingForm() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-txt-primary mb-2">
+                  <label className="block text-sm font-medium text-dark mb-2">
                     Pickup/Delivery Address{' '}
                     <span className="text-orange-500">*</span>
                   </label>
@@ -369,7 +366,7 @@ export default function LaundryBookingForm() {
             {/* Returning customer phone + verify */}
             {isReturningCustomer && (
               <div>
-                <label className="block text-sm font-medium text-txt-primary mb-2">
+                <label className="block text-sm font-medium text-dark mb-2">
                   Phone Number <span className="text-orange-500">*</span>
                 </label>
                 <input
@@ -411,8 +408,8 @@ export default function LaundryBookingForm() {
         {currentStep === 2 && (
           <div className="space-y-6">
             <div className="flex items-center gap-2 mb-4">
-              <LocalLaundryServiceIcon className="text-txt-primary" />
-              <h3 className="text-xl font-semibold text-txt-primary">
+              <LocalLaundryServiceIcon className="text-dark" />
+              <h3 className="text-xl font-semibold text-dark">
                 Service Details
               </h3>
             </div>
@@ -421,7 +418,7 @@ export default function LaundryBookingForm() {
             </p>
 
             <div>
-              <label className="block text-sm font-medium text-txt-primary mb-2">
+              <label className="block text-sm font-medium text-dark mb-2">
                 Promo (Bundles)
               </label>
               <select
@@ -447,7 +444,7 @@ export default function LaundryBookingForm() {
 
             {formData.promo && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="font-semibold text-txt-primary mb-2">
+                <p className="font-semibold text-dark mb-2">
                   Service includes:
                 </p>
                 <ul className="list-disc ml-6 text-sm text-txt-muted space-y-1">
@@ -461,7 +458,7 @@ export default function LaundryBookingForm() {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-txt-primary mb-3">
+              <label className="block text-sm font-medium text-dark mb-3">
                 Main Services (Wash, Dry, Fold)
               </label>
               {formData.promo && (
@@ -498,7 +495,7 @@ export default function LaundryBookingForm() {
             {/* Supplies Needed (Quantity) */}
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-sm font-medium text-txt-primary">
+                <span className="text-sm font-medium text-dark">
                   Supplies Needed (Quantity)
                 </span>
               </div>
@@ -509,7 +506,7 @@ export default function LaundryBookingForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {(formData.supplies ?? []).map((item) => (
                   <div key={item.key}>
-                    <label className="block text-sm font-medium text-txt-primary mb-2">
+                    <label className="block text-sm font-medium text-dark mb-2">
                       {item.name}
                     </label>
                     <div className="flex items-center gap-2">
@@ -548,17 +545,15 @@ export default function LaundryBookingForm() {
         {currentStep === 3 && (
           <div className="space-y-6">
             <div className="flex items-center gap-2 mb-4">
-              <CalendarMonthIcon className="text-txt-primary" />
-              <h3 className="text-xl font-semibold text-txt-primary">
-                Schedule
-              </h3>
+              <CalendarMonthIcon className="text-dark" />
+              <h3 className="text-xl font-semibold text-dark">Schedule</h3>
             </div>
             <p className="text-sm text-orange-500 mb-6">
               Choose your preferred pickup date and time
             </p>
 
             <div>
-              <label className="block text-sm font-medium text-txt-primary mb-2">
+              <label className="block text-sm font-medium text-dark mb-2">
                 Pickup Date <span className="text-orange-500">*</span>
               </label>
               <input
@@ -573,7 +568,7 @@ export default function LaundryBookingForm() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-txt-primary mb-2">
+              <label className="block text-sm font-medium text-dark mb-2">
                 Pickup Time <span className="text-orange-500">*</span>
               </label>
               <select
@@ -605,8 +600,8 @@ export default function LaundryBookingForm() {
         {currentStep === 4 && (
           <div className="space-y-6">
             <div className="flex items-center gap-2 mb-4">
-              <CheckCircleIcon className="text-txt-primary" />
-              <h3 className="text-xl font-semibold text-txt-primary">Review</h3>
+              <CheckCircleIcon className="text-dark" />
+              <h3 className="text-xl font-semibold text-dark">Review</h3>
             </div>
             <p className="text-sm text-orange-500 mb-6">
               Please review your booking details before confirming
@@ -614,7 +609,7 @@ export default function LaundryBookingForm() {
 
             <div className="space-y-4">
               <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <h4 className="font-semibold text-txt-primary mb-3">
+                <h4 className="font-semibold text-dark mb-3">
                   Personal Information
                 </h4>
                 <div className="space-y-2 text-sm">
@@ -638,7 +633,7 @@ export default function LaundryBookingForm() {
               </div>
 
               <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <h4 className="font-semibold text-txt-primary mb-3">
+                <h4 className="font-semibold text-dark mb-3">
                   Service Details
                 </h4>
                 <div className="space-y-2 text-sm">
@@ -674,9 +669,7 @@ export default function LaundryBookingForm() {
               </div>
 
               <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <h4 className="font-semibold text-txt-primary mb-3">
-                  Schedule
-                </h4>
+                <h4 className="font-semibold text-dark mb-3">Schedule</h4>
                 <div className="space-y-2 text-sm">
                   <p>
                     <span className="text-txt-muted">Date:</span>{' '}
@@ -690,7 +683,7 @@ export default function LaundryBookingForm() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-txt-primary mb-2">
+                <label className="block text-sm font-medium text-dark mb-2">
                   Special Instructions (Optional)
                 </label>
                 <textarea
