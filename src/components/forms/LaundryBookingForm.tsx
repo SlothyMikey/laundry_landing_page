@@ -1,7 +1,7 @@
 //TODO: Implement Customer Identity Verification Logic
+//TODO: Do not forget the Loading & Error of Services
 
-import { useState } from 'react';
-import { promoPlans, services as baseServices } from '@/constants/pricingData';
+import { useState, useEffect } from 'react';
 import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
@@ -15,7 +15,8 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CheckIcon from '@mui/icons-material/Check';
 import { Link } from 'react-router-dom';
 import type { FormData } from '@/types/BookingTypes';
-import { isPhoneNumberValid } from '@/lib/utils';
+import { isPhoneNumberValid, isEmailValid } from '@/lib/utils';
+import { useServices } from '@/hooks/useServices';
 
 export default function LaundryBookingForm() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -26,33 +27,50 @@ export default function LaundryBookingForm() {
     email: '',
     pickupAddress: '',
     promo: '',
+    load: 1,
     services: [],
-    supplies: [
-      { key: 'detergent', name: 'Detergent', quantity: 0 },
-      { key: 'softener', name: 'Downy (Fabric Softener)', quantity: 0 },
-      { key: 'bleach', name: 'Color-Safe Bleach', quantity: 0 },
-      { key: 'plasticBag', name: 'Plastic Bag', quantity: 0 },
-    ],
+    supplies: [],
     pickupDate: '',
     specialInstructions: '',
   });
   const [isReturningCustomer, setIsReturningCustomer] = useState(false);
-  4;
-  const [loadWeight, setLoadWeight] = useState(0);
+  const { services, loading, error, loadServices } = useServices();
+
+  useEffect(() => {
+    loadServices();
+  }, []);
 
   // Derived options
-  const promoOptions = promoPlans.map((plan) => ({
-    label: plan.planName,
-    value: plan.planName,
-    price: plan.price,
-    features: plan.features,
-  }));
+  const bundleOptions = services
+    .filter((svc) => svc.service_type === 'bundle_package')
+    .map((plan) => ({
+      label: plan.service_name,
+      value: plan.service_name,
+      price: plan.price,
+      features: plan.description?.split(',').map((feat) => feat.trim()) || [],
+    }));
 
-  const mainServiceOptions = baseServices.map((svc) => ({
-    label: svc.planName,
-    value: svc.planName,
-    price: svc.price,
-  }));
+  const mainServiceOptions = services
+    .filter((svc) => svc.service_type === 'main_service')
+    .map((svc) => ({
+      label: svc.service_name,
+      value: svc.service_name,
+      price: svc.price,
+    }));
+
+  // Initialize supplies from API when loaded
+  useEffect(() => {
+    if (services.length > 0 && (formData.supplies ?? []).length === 0) {
+      const initialSupplies = services
+        .filter((svc) => svc.service_type === 'add_on_supply')
+        .map((svc) => ({
+          key: svc.service_name,
+          name: svc.service_name,
+          quantity: 0,
+        }));
+      setFormData((prev) => ({ ...prev, supplies: initialSupplies }));
+    }
+  }, [services]);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -70,8 +88,18 @@ export default function LaundryBookingForm() {
       return;
     }
 
+    // Phone number validation: only digits, max 11 characters
+    if (name === 'phoneNumber') {
+      const numericValue = value.replace(/\D/g, ''); // Remove non-digits
+      if (numericValue.length <= 11) {
+        setFormData({ ...formData, [name]: numericValue });
+      }
+      return;
+    }
+
     setFormData({ ...formData, [name]: value });
   };
+
   const handleServiceToggle = (serviceName: string) => {
     setFormData((prev) => {
       const isSelected = prev.services?.includes(serviceName);
@@ -87,19 +115,34 @@ export default function LaundryBookingForm() {
   };
 
   const handleNext = () => {
+    // Input Validation
     if (currentStep === 1) {
       if (isReturningCustomer) {
         if (!isCustomerVerified) {
           alert('Please verify your phone number');
           return;
         }
-      } else {
+      }
+
+      if (!isReturningCustomer) {
         if (
           !formData.fullName.trim() ||
           !formData.phoneNumber.trim() ||
           !formData.pickupAddress.trim()
         ) {
           alert('Please fill in all required fields');
+          return;
+        }
+
+        // Phone number format validation
+        if (!isPhoneNumberValid(formData.phoneNumber)) {
+          alert('Please enter a valid phone number');
+          return;
+        }
+
+        // Email format validation (if provided)
+        if (formData.email && !isEmailValid(formData.email)) {
+          alert('Please enter a valid email address');
           return;
         }
       }
@@ -130,8 +173,6 @@ export default function LaundryBookingForm() {
     if (currentStep < 4) setCurrentStep(currentStep + 1);
   };
 
-  // Supplies helpers
-  // Supplies helpers (array version)
   const updateSupply = (key: string, delta: number) => {
     setFormData((prev) => ({
       ...prev,
@@ -416,11 +457,20 @@ export default function LaundryBookingForm() {
             </div>
 
             {/* Load Input */}
+            <p className="text-sm text-orange-500 mb-6">
+              Please indicate your estimated laundry weight per load (7kg = 1
+              Load)
+            </p>
 
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => setLoadWeight(Math.max(0, loadWeight - 1))}
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    load: Math.max(1, prev.load - 1),
+                  }))
+                }
                 className="w-9 h-9 rounded-lg border border-gray-300 bg-gray-50 hover:bg-gray-100"
               >
                 −
@@ -428,13 +478,26 @@ export default function LaundryBookingForm() {
               <input
                 type="text"
                 inputMode="numeric"
-                value={loadWeight}
-                onChange={(e) => setLoadWeight(Number(e.target.value))}
+                value={formData.load}
+                onChange={(e) => {
+                  const numericValue = e.target.value.replace(/\D/g, '');
+                  if (numericValue === '') {
+                    setFormData((prev) => ({ ...prev, load: 1 }));
+                    return;
+                  }
+                  const parsed = Number(numericValue);
+                  setFormData((prev) => ({
+                    ...prev,
+                    load: Math.max(1, parsed),
+                  }));
+                }}
                 className="flex-1 text-center border border-gray-300 rounded-lg px-4 py-2 bg-gray-50"
               />
               <button
                 type="button"
-                onClick={() => setLoadWeight(loadWeight + 1)}
+                onClick={() =>
+                  setFormData((prev) => ({ ...prev, load: prev.load + 1 }))
+                }
                 className="w-9 h-9 rounded-lg border border-gray-300 bg-gray-50 hover:bg-gray-100"
               >
                 +
@@ -449,7 +512,6 @@ export default function LaundryBookingForm() {
             </div>
 
             {/* Service Details */}
-
             <p className="text-sm text-orange-500 mb-6">
               Select your preferred service or main service options
             </p>
@@ -466,7 +528,7 @@ export default function LaundryBookingForm() {
                 className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-bg-highlight bg-gray-50 disabled:opacity-60"
               >
                 <option value="">Select a promo</option>
-                {promoOptions.map((service) => (
+                {bundleOptions.map((service) => (
                   <option key={service.value} value={service.value}>
                     {service.label} - ₱{service.price}/Load
                   </option>
@@ -485,7 +547,7 @@ export default function LaundryBookingForm() {
                   Service includes:
                 </p>
                 <ul className="list-disc ml-6 text-sm text-txt-muted space-y-1">
-                  {promoOptions
+                  {bundleOptions
                     .find((s) => s.value === formData.promo)
                     ?.features.map((feature, idx) => (
                       <li key={idx}>{feature}</li>
@@ -537,7 +599,7 @@ export default function LaundryBookingForm() {
                 </span>
               </div>
               <p className="text-xs text-txt-muted mb-3">
-                Enter 0 if you have your own or don't need the supply
+                Enter 0 if you have your own or it is included in the promo
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -668,6 +730,10 @@ export default function LaundryBookingForm() {
                       </strong>
                     </p>
                   )}
+                  <p>
+                    <span className="text-txt-muted">Load Weight:</span>{' '}
+                    <strong>{formData.load}</strong>
+                  </p>
                   <div>
                     <span className="text-txt-muted">Supplies:</span>{' '}
                     {(formData.supplies ?? []).filter((s) => s.quantity > 0)
