@@ -13,7 +13,6 @@ export interface FormData {
   supplies?: SupplyItem[];
 
   pickupDate: string;
-  pickupTime: string;
 
   specialInstructions: string;
 }
