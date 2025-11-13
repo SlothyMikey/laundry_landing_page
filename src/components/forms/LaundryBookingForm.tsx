@@ -34,10 +34,11 @@ export default function LaundryBookingForm() {
       { key: 'plasticBag', name: 'Plastic Bag', quantity: 0 },
     ],
     pickupDate: '',
-    pickupTime: '',
     specialInstructions: '',
   });
   const [isReturningCustomer, setIsReturningCustomer] = useState(false);
+  4;
+  const [loadWeight, setLoadWeight] = useState(0);
 
   // Derived options
   const promoOptions = promoPlans.map((plan) => ({
@@ -120,8 +121,8 @@ export default function LaundryBookingForm() {
     }
 
     if (currentStep === 3) {
-      if (!formData.pickupDate.trim() || !formData.pickupTime.trim()) {
-        alert('Please Select a Pickup Date and Time');
+      if (!formData.pickupDate.trim()) {
+        alert('Please Select a Pickup Date');
         return;
       }
     }
@@ -404,7 +405,7 @@ export default function LaundryBookingForm() {
           </div>
         )}
 
-        {/* Step 2: Service Details */}
+        {/* Step 2: Laundry Details */}
         {currentStep === 2 && (
           <div className="space-y-6">
             <div className="flex items-center gap-2 mb-4">
@@ -413,8 +414,44 @@ export default function LaundryBookingForm() {
                 Service Details
               </h3>
             </div>
+
+            {/* Load Input */}
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setLoadWeight(Math.max(0, loadWeight - 1))}
+                className="w-9 h-9 rounded-lg border border-gray-300 bg-gray-50 hover:bg-gray-100"
+              >
+                −
+              </button>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={loadWeight}
+                onChange={(e) => setLoadWeight(Number(e.target.value))}
+                className="flex-1 text-center border border-gray-300 rounded-lg px-4 py-2 bg-gray-50"
+              />
+              <button
+                type="button"
+                onClick={() => setLoadWeight(loadWeight + 1)}
+                className="w-9 h-9 rounded-lg border border-gray-300 bg-gray-50 hover:bg-gray-100"
+              >
+                +
+              </button>
+            </div>
+
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <p className="text-sm text-yellow-800">
+                <strong>⚠️ Important:</strong> Maximum 7kg per load. Exceeding
+                this limit will count as an additional load.
+              </p>
+            </div>
+
+            {/* Service Details */}
+
             <p className="text-sm text-orange-500 mb-6">
-              Select your preferred service and any additional options
+              Select your preferred service or main service options
             </p>
 
             <div>
@@ -428,7 +465,7 @@ export default function LaundryBookingForm() {
                 disabled={(formData.services?.length ?? 0) > 0}
                 className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-bg-highlight bg-gray-50 disabled:opacity-60"
               >
-                <option value="">Select a promo (optional)</option>
+                <option value="">Select a promo</option>
                 {promoOptions.map((service) => (
                   <option key={service.value} value={service.value}>
                     {service.label} - ₱{service.price}/Load
@@ -500,7 +537,7 @@ export default function LaundryBookingForm() {
                 </span>
               </div>
               <p className="text-xs text-txt-muted mb-3">
-                Enter 0 if customer has their own or doesn't need the supply
+                Enter 0 if you have your own or don't need the supply
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -549,8 +586,15 @@ export default function LaundryBookingForm() {
               <h3 className="text-xl font-semibold text-dark">Schedule</h3>
             </div>
             <p className="text-sm text-orange-500 mb-6">
-              Choose your preferred pickup date and time
+              Choose your preferred pickup date
             </p>
+
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <p className="text-sm text-yellow-800">
+                We Offer free pickup and delivery within 2km radius. extra fee
+                will be applied for locations beyond this range.
+              </p>
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-dark mb-2">
@@ -565,33 +609,6 @@ export default function LaundryBookingForm() {
                 min={new Date().toISOString().split('T')[0]}
                 className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-bg-highlight bg-gray-50"
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-dark mb-2">
-                Pickup Time <span className="text-orange-500">*</span>
-              </label>
-              <select
-                name="pickupTime"
-                value={formData.pickupTime}
-                onChange={handleChange}
-                required
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-bg-highlight bg-gray-50"
-              >
-                <option value="">Select a time</option>
-                <option value="08:00-10:00">8:00 AM - 10:00 AM</option>
-                <option value="10:00-12:00">10:00 AM - 12:00 PM</option>
-                <option value="12:00-14:00">12:00 PM - 2:00 PM</option>
-                <option value="14:00-16:00">2:00 PM - 4:00 PM</option>
-                <option value="16:00-18:00">4:00 PM - 6:00 PM</option>
-              </select>
-            </div>
-
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-sm text-yellow-800">
-                <strong>⚠️ Important:</strong> Maximum 7kg per load. Exceeding
-                this limit will count as an additional load.
-              </p>
             </div>
           </div>
         )}
@@ -675,10 +692,6 @@ export default function LaundryBookingForm() {
                     <span className="text-txt-muted">Date:</span>{' '}
                     {formData.pickupDate}
                   </p>
-                  <p>
-                    <span className="text-txt-muted">Time:</span>{' '}
-                    {formData.pickupTime}
-                  </p>
                 </div>
               </div>
 
@@ -694,6 +707,24 @@ export default function LaundryBookingForm() {
                   placeholder="Any special requests or notes..."
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-bg-highlight resize-none bg-gray-50"
                 />
+              </div>
+              <div className="mt-4">
+                <p className="text-sm text-txt-muted mb-4">
+                  Please review all details carefully before confirming your
+                  booking.
+                </p>
+                <p className="text-sm">
+                  By clicking "Confirm Booking", you agree to our{' '}
+                  <a
+                    href="/terms"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline"
+                  >
+                    Terms and Conditions
+                  </a>
+                  .
+                </p>
               </div>
             </div>
           </div>
