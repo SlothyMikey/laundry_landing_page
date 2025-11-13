@@ -1,7 +1,7 @@
 //TODO: Implement Customer Identity Verification Logic
 
 import { useState } from 'react';
-import { pricingPlans, additionalServices } from '@/constants/pricingData';
+import { promoPlans, services as baseServices } from '@/constants/pricingData';
 import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
@@ -25,27 +25,32 @@ export default function LaundryBookingForm() {
     phoneNumber: '',
     email: '',
     pickupAddress: '',
-    service: '',
-    additionalServices: [],
+    promo: '',
+    services: [],
+    supplies: [
+      { key: 'detergent', name: 'Detergent', quantity: 0 },
+      { key: 'softener', name: 'Downy (Fabric Softener)', quantity: 0 },
+      { key: 'bleach', name: 'Color-Safe Bleach', quantity: 0 },
+      { key: 'plasticBag', name: 'Plastic Bag', quantity: 0 },
+    ],
     pickupDate: '',
     pickupTime: '',
     specialInstructions: '',
   });
   const [isReturningCustomer, setIsReturningCustomer] = useState(false);
 
-  const allServices = [
-    ...pricingPlans.map((plan) => ({
-      label: plan.planName,
-      value: plan.planName,
-      price: plan.price,
-      features: plan.features,
-    })),
-  ];
+  // Derived options
+  const promoOptions = promoPlans.map((plan) => ({
+    label: plan.planName,
+    value: plan.planName,
+    price: plan.price,
+    features: plan.features,
+  }));
 
-  const additionalServiceOptions = additionalServices.map((service) => ({
-    label: service.planName,
-    value: service.planName,
-    price: service.price,
+  const mainServiceOptions = baseServices.map((svc) => ({
+    label: svc.planName,
+    value: svc.planName,
+    price: svc.price,
   }));
 
   const handleChange = (
@@ -53,16 +58,31 @@ export default function LaundryBookingForm() {
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >,
   ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+    const { name, value } = e.target;
+    // If selecting a promo, clear any selected main services (wash/dry/fold)
+    if (name === 'promo') {
+      setFormData((prev) => ({
+        ...prev,
+        promo: value,
+        services: [],
+      }));
+      return;
+    }
 
-  const handleAdditionalServiceToggle = (serviceName: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      additionalServices: prev.additionalServices?.includes(serviceName)
-        ? prev.additionalServices.filter((s) => s !== serviceName)
-        : [...(prev.additionalServices ?? []), serviceName],
-    }));
+    setFormData({ ...formData, [name]: value });
+  };
+  const handleServiceToggle = (serviceName: string) => {
+    setFormData((prev) => {
+      const isSelected = prev.services?.includes(serviceName);
+      const nextServices = isSelected
+        ? (prev.services ?? []).filter((s) => s !== serviceName)
+        : [...(prev.services ?? []), serviceName];
+
+      const nextPromo =
+        !isSelected && nextServices.length > 0 ? '' : prev.promo;
+
+      return { ...prev, services: nextServices, promo: nextPromo };
+    });
   };
 
   const handleNext = () => {
@@ -85,8 +105,16 @@ export default function LaundryBookingForm() {
     }
 
     if (currentStep === 2) {
-      if (!formData.service.trim()) {
-        alert('Please Select Atleast One Service');
+      const hasPromo = !!formData.promo.trim();
+      const hasMainServices = (formData.services?.length ?? 0) > 0;
+      if (hasPromo && hasMainServices) {
+        alert('Please choose either a promo or main services, not both.');
+        return;
+      }
+      if (!hasPromo && !hasMainServices) {
+        alert(
+          'Please select a promo or choose at least one main service (wash, dry, fold).',
+        );
         return;
       }
     }
@@ -99,6 +127,35 @@ export default function LaundryBookingForm() {
     }
 
     if (currentStep < 4) setCurrentStep(currentStep + 1);
+  };
+
+  // Supplies helpers
+  // Supplies helpers (array version)
+  const updateSupply = (key: string, delta: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      supplies: (prev.supplies ?? []).map((item) =>
+        item.key === key
+          ? {
+              ...item,
+              quantity: Math.max(0, Math.min(99, item.quantity + delta)),
+            }
+          : item,
+      ),
+    }));
+  };
+
+  const setSupplyDirect = (key: string, value: string) => {
+    const parsed = Math.max(
+      0,
+      Math.min(99, Number(value.replace(/\D/g, '')) || 0),
+    );
+    setFormData((prev) => ({
+      ...prev,
+      supplies: (prev.supplies ?? []).map((item) =>
+        item.key === key ? { ...item, quantity: parsed } : item,
+      ),
+    }));
   };
 
   const handleBack = () => {
@@ -245,8 +302,8 @@ export default function LaundryBookingForm() {
               </label>
             </div>
 
-            {/* Conditional rendering for form fields */}
-            {!isReturningCustomer ? (
+            {/* Personal info fields (new customer) */}
+            {!isReturningCustomer && (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -263,7 +320,6 @@ export default function LaundryBookingForm() {
                       className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-bg-highlight bg-gray-50"
                     />
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-txt-primary mb-2">
                       Phone Number <span className="text-orange-500">*</span>
@@ -279,8 +335,6 @@ export default function LaundryBookingForm() {
                     />
                   </div>
                 </div>
-
-                {/* Email - Full Width */}
                 <div>
                   <label className="block text-sm font-medium text-txt-primary mb-2">
                     Email Address (Optional)
@@ -291,12 +345,9 @@ export default function LaundryBookingForm() {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="JohnDoe@example.com"
-                    required
                     className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-bg-highlight bg-gray-50"
                   />
                 </div>
-
-                {/* Pickup/Delivery Address - Full Width */}
                 <div>
                   <label className="block text-sm font-medium text-txt-primary mb-2">
                     Pickup/Delivery Address{' '}
@@ -313,7 +364,10 @@ export default function LaundryBookingForm() {
                   />
                 </div>
               </>
-            ) : (
+            )}
+
+            {/* Returning customer phone + verify */}
+            {isReturningCustomer && (
               <div>
                 <label className="block text-sm font-medium text-txt-primary mb-2">
                   Phone Number <span className="text-orange-500">*</span>
@@ -324,7 +378,7 @@ export default function LaundryBookingForm() {
                   value={formData.phoneNumber}
                   onChange={(e) => {
                     handleChange(e);
-                    isCustomerVerified && setIsCustomerVerified(false); // Reset verification if number changes
+                    isCustomerVerified && setIsCustomerVerified(false);
                   }}
                   placeholder="0912 345 6789"
                   required
@@ -341,16 +395,15 @@ export default function LaundryBookingForm() {
                   startIcon={<CheckIcon />}
                   variant="contained"
                   color="primary"
-                  sx={{
-                    marginTop: '8px',
-                  }}
+                  sx={{ marginTop: '8px' }}
                 >
-                  Verify
+                  {isCustomerVerified ? 'Verified' : 'Verify'}
                 </Button>
               </div>
             )}
 
-            {/* Always show phone number field */}
+            {/* End personal info */}
+            {/* End Step 1 */}
           </div>
         )}
 
@@ -369,32 +422,37 @@ export default function LaundryBookingForm() {
 
             <div>
               <label className="block text-sm font-medium text-txt-primary mb-2">
-                Main Service <span className="text-orange-500">*</span>
+                Promo (Bundles)
               </label>
               <select
-                name="service"
-                value={formData.service}
+                name="promo"
+                value={formData.promo}
                 onChange={handleChange}
-                required
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-bg-highlight bg-gray-50"
+                disabled={(formData.services?.length ?? 0) > 0}
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-bg-highlight bg-gray-50 disabled:opacity-60"
               >
-                <option value="">Select a service</option>
-                {allServices.map((service) => (
+                <option value="">Select a promo (optional)</option>
+                {promoOptions.map((service) => (
                   <option key={service.value} value={service.value}>
                     {service.label} - ₱{service.price}/Load
                   </option>
                 ))}
               </select>
+              {(formData.services?.length ?? 0) > 0 && (
+                <p className="text-sm text-txt-muted mt-2">
+                  Promo selection disabled because main services are selected.
+                </p>
+              )}
             </div>
 
-            {formData.service && (
+            {formData.promo && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <p className="font-semibold text-txt-primary mb-2">
                   Service includes:
                 </p>
                 <ul className="list-disc ml-6 text-sm text-txt-muted space-y-1">
-                  {allServices
-                    .find((s) => s.value === formData.service)
+                  {promoOptions
+                    .find((s) => s.value === formData.promo)
                     ?.features.map((feature, idx) => (
                       <li key={idx}>{feature}</li>
                     ))}
@@ -404,23 +462,27 @@ export default function LaundryBookingForm() {
 
             <div>
               <label className="block text-sm font-medium text-txt-primary mb-3">
-                Additional Services (Optional)
+                Main Services (Wash, Dry, Fold)
               </label>
+              {formData.promo && (
+                <p className="text-sm text-txt-muted mb-2">
+                  Disabled because a promo is selected.
+                </p>
+              )}
               <div className="space-y-3">
-                {additionalServiceOptions.map((service) => (
+                {mainServiceOptions.map((service) => (
                   <label
                     key={service.value}
-                    className="flex items-center justify-between p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors bg-gray-50"
+                    className={`flex items-center justify-between p-4 border border-gray-300 rounded-lg cursor-pointer transition-colors bg-gray-50 ${formData.promo ? 'opacity-60 cursor-not-allowed' : 'hover:bg-gray-50'}`}
                   >
                     <div className="flex items-center gap-3">
                       <input
                         type="checkbox"
-                        checked={(formData.additionalServices ?? []).includes(
+                        disabled={!!formData.promo}
+                        checked={(formData.services ?? []).includes(
                           service.value,
                         )}
-                        onChange={() =>
-                          handleAdditionalServiceToggle(service.value)
-                        }
+                        onChange={() => handleServiceToggle(service.value)}
                         className="w-5 h-5 text-bg-highlight focus:ring-2 focus:ring-bg-highlight rounded"
                       />
                       <span className="font-medium">{service.label}</span>
@@ -429,6 +491,53 @@ export default function LaundryBookingForm() {
                       +₱{service.price}
                     </span>
                   </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Supplies Needed (Quantity) */}
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-sm font-medium text-txt-primary">
+                  Supplies Needed (Quantity)
+                </span>
+              </div>
+              <p className="text-xs text-txt-muted mb-3">
+                Enter 0 if customer has their own or doesn't need the supply
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {(formData.supplies ?? []).map((item) => (
+                  <div key={item.key}>
+                    <label className="block text-sm font-medium text-txt-primary mb-2">
+                      {item.name}
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => updateSupply(item.key, -1)}
+                        className="w-9 h-9 rounded-lg border border-gray-300 bg-gray-50 hover:bg-gray-100"
+                      >
+                        −
+                      </button>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={item.quantity}
+                        onChange={(e) =>
+                          setSupplyDirect(item.key, e.target.value)
+                        }
+                        className="flex-1 text-center border border-gray-300 rounded-lg px-4 py-2 bg-gray-50"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => updateSupply(item.key, 1)}
+                        className="w-9 h-9 rounded-lg border border-gray-300 bg-gray-50 hover:bg-gray-100"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
@@ -533,18 +642,34 @@ export default function LaundryBookingForm() {
                   Service Details
                 </h4>
                 <div className="space-y-2 text-sm">
-                  <p>
-                    <span className="text-txt-muted">Main Service:</span>{' '}
-                    {formData.service}
-                  </p>
-                  {(formData.additionalServices?.length ?? 0) > 0 && (
+                  {formData.promo ? (
                     <p>
-                      <span className="text-txt-muted">
-                        Additional Services:
-                      </span>{' '}
-                      {(formData.additionalServices ?? []).join(', ')}
+                      <span className="text-txt-muted">Promo:</span>{' '}
+                      <strong>{formData.promo}</strong>
+                    </p>
+                  ) : (
+                    <p>
+                      <span className="text-txt-muted">Main Services:</span>{' '}
+                      <strong>
+                        {(formData.services ?? []).join(', ') ||
+                          'None Selected'}
+                      </strong>
                     </p>
                   )}
+                  <div>
+                    <span className="text-txt-muted">Supplies:</span>{' '}
+                    {(formData.supplies ?? []).filter((s) => s.quantity > 0)
+                      .length > 0 ? (
+                      <span>
+                        {(formData.supplies ?? [])
+                          .filter((s) => s.quantity > 0)
+                          .map((s) => `${s.name} x${s.quantity}`)
+                          .join(', ')}
+                      </span>
+                    ) : (
+                      <span className="italic">None</span>
+                    )}
+                  </div>
                 </div>
               </div>
 

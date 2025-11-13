@@ -1,6 +1,7 @@
 import type { PricingPlanTypes } from '@/types/pricingTypes';
 
-export const pricingPlans: PricingPlanTypes[] = [
+// Promo bundle plans
+export const promoPlans: PricingPlanTypes[] = [
   {
     price: 165,
     planName: 'Full Service Plan',
@@ -28,11 +29,12 @@ export const pricingPlans: PricingPlanTypes[] = [
   },
 ];
 
-export const additionalServices: PricingPlanTypes[] = [
+// Individual main services (wash, dry, fold, press)
+export const services: PricingPlanTypes[] = [
   {
     price: 30,
-    planName: 'Hand Wash',
-    description: 'Gentle hand washing for delicate items.',
+    planName: 'Wash',
+    description: 'Gentle washing for delicate items.',
     features: ['Delicate fabric care', 'Air drying included'],
     variant: 'standard',
     showButton: false,
@@ -47,8 +49,8 @@ export const additionalServices: PricingPlanTypes[] = [
   },
   {
     price: 35,
-    planName: 'Press',
-    description: 'Professional ironing and pressing.',
+    planName: 'Fold',
+    description: 'Professional folding service.',
     features: ['Wrinkle-free finish', 'Crisp and clean'],
     variant: 'standard',
     showButton: false,
