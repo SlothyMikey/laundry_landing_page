@@ -1,32 +1,21 @@
 export interface FormData {
-  fullName: string;
-  phoneNumber: string;
+  name: string;
+  phone_number: string;
   email?: string;
-  pickupAddress: string;
+  address: string;
   load: number;
 
-  // Selected promo bundle (mutually exclusive with services array)
-  promo: string;
-  // Selected individual main services (wash, dry, fold, press)
-  services?: string[];
-
-  // Supplies quantities requested (0 means not needed / customer has own)
+  promo?: string;
+  main_services?: string[];
   supplies?: SupplyItem[];
 
-  pickupDate: string;
+  pickup_date: string;
 
-  specialInstructions: string;
+  special_instruction: string;
 }
 
-export type SupplyKey =
-  | 'detergent'
-  | 'softener'
-  | 'bleach'
-  | 'plasticBag'
-  | string;
-
 export interface SupplyItem {
-  key: SupplyKey; // unique key for logic
+  key: string; // unique key for logic
   name: string; // label to display
   quantity: number; // integer >= 0
 }
