@@ -34,6 +34,7 @@ export default function LaundryBookingForm() {
     supplies: [],
     pickup_date: '',
     special_instruction: '',
+    payment_type: '',
   });
   const [isReturningCustomer, setIsReturningCustomer] = useState(false);
   const { services, loadServices } = useServices();
@@ -255,6 +256,10 @@ export default function LaundryBookingForm() {
 
   const handleConfirmBooking = async () => {
     try {
+      if (!formData.payment_type || formData.payment_type.trim() === '') {
+        alert('Please select a payment type');
+        return;
+      }
       await submitBooking(formData);
       setShowSuccess(true);
       setCurrentStep(1);
@@ -269,6 +274,7 @@ export default function LaundryBookingForm() {
         supplies: [],
         pickup_date: '',
         special_instruction: '',
+        payment_type: '',
       });
     } catch (err) {
       console.error('Booking failed:', err);
@@ -810,6 +816,25 @@ export default function LaundryBookingForm() {
               </div>
 
               <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <h4 className="font-semibold text-dark mb-3">Payment</h4>
+                <div className="space-y-2 text-sm">
+                  <label className="block text-sm font-medium text-dark mb-2">
+                    Payment Type <span className="text-orange-500">*</span>
+                  </label>
+                  <select
+                    name="payment_type"
+                    value={formData.payment_type || ''}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-bg-highlight bg-gray-50"
+                  >
+                    <option value="">Select payment method</option>
+                    <option value="Cash">Cash on Pickup</option>
+                    <option value="Online">GCash</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                 <h4 className="font-semibold text-dark mb-3">
                   Service Details
                 </h4>
@@ -856,6 +881,16 @@ export default function LaundryBookingForm() {
                     <span className="text-txt-muted">Date:</span>{' '}
                     {formData.pickup_date}
                   </p>
+                  {formData.payment_type && (
+                    <p>
+                      <span className="text-txt-muted">Payment Type:</span>{' '}
+                      {formData.payment_type === 'Cash'
+                        ? 'Cash on Pickup/Delivery'
+                        : formData.payment_type === 'Online'
+                          ? 'GCash'
+                          : ''}
+                    </p>
+                  )}
                 </div>
               </div>
 

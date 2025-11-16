@@ -12,6 +12,7 @@ export interface FormData {
   pickup_date: string;
 
   special_instruction: string;
+  payment_type?: string;
 }
 
 export interface SupplyItem {

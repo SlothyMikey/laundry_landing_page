@@ -35,6 +35,7 @@ export function useBooking() {
           (formData as any).special_instruction ||
           (formData as any).specialInstructions ||
           '',
+        payment_type: (formData as any).payment_type,
       };
 
       await createBooking(payload as any);
